@@ -16,7 +16,7 @@ use termwiz::color::LinearRgba;
 use termwiz::surface::CursorShape;
 use wezterm_bidi::Direction;
 use wezterm_term::color::ColorAttribute;
-use wezterm_term::CellAttributes;
+use wezterm_term::{CellAttributes, Intensity};
 
 impl crate::TermWindow {
     /// "Render" a line of the terminal screen into the vertex buffer.
@@ -496,11 +496,12 @@ impl crate::TermWindow {
 
                     if self.config.custom_block_glyphs {
                         if let Some(block) = &info.block_key {
+                            let bold = cluster.attrs.intensity() == Intensity::Bold;
                             texture.replace(
                                 gl_state
                                     .glyph_cache
                                     .borrow_mut()
-                                    .cached_block(*block, &params.render_metrics)
+                                    .cached_block(*block, &params.render_metrics, bold)
                                     .context("cached_block")?,
                             );
                             // Custom glyphs don't have the same offsets as computed

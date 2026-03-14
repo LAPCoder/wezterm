@@ -309,6 +309,7 @@ impl crate::TermWindow {
                     cell_size: euclid::size2(cell_size.width as isize, cell_size.height as isize),
                 },
                 &self.render_metrics,
+                false,
             )?
             .texture_coords();
 
@@ -422,7 +423,7 @@ impl crate::TermWindow {
         let sprite = gl_state
             .glyph_cache
             .borrow_mut()
-            .cached_block(block, &params.render_metrics)?
+            .cached_block(block, &params.render_metrics, false)?
             .texture_coords();
 
         let mut quad = quads.allocate()?;
