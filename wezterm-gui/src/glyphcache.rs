@@ -69,7 +69,7 @@ impl From<&RenderMetrics> for CellMetricKey {
 pub struct SizedBlockKey {
     pub block: BlockKey,
     pub size: CellMetricKey,
-    pub bold: bool,
+    pub line_width: isize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -1139,17 +1139,16 @@ impl GlyphCache {
         &mut self,
         block: BlockKey,
         metrics: &RenderMetrics,
-        bold: bool,
     ) -> anyhow::Result<Sprite> {
         let key = SizedBlockKey {
             block,
             size: metrics.into(),
-            bold,
+			line_width: metrics.underline_height,
         };
         if let Some(s) = self.block_glyphs.get(&key) {
             return Ok(s.clone());
         }
-        self.block_sprite(metrics, key, bold)
+        self.block_sprite(metrics, key)
     }
 
     fn line_sprite(&mut self, key: LineKey, metrics: &RenderMetrics) -> anyhow::Result<Sprite> {

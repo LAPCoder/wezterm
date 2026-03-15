@@ -3372,9 +3372,8 @@ impl BlockKey {
                     PolyCommand::LineTo(BlockCoord::Frac(1, 2), BlockCoord::Frac(3, 4)),
                     PolyCommand::QuadTo {
                         control: (BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 2)),
-                        to: (BlockCoord::Frac(3, 4), BlockCoord::Frac(1, 2)),
+                        to: (BlockCoord::One, BlockCoord::Frac(1, 2)),
                     },
-                    PolyCommand::LineTo(BlockCoord::One, BlockCoord::Frac(1, 2)),
                 ],
                 intensity: BlockAlpha::Full,
                 style: PolyStyle::Outline,
@@ -3386,9 +3385,8 @@ impl BlockKey {
                     PolyCommand::LineTo(BlockCoord::Frac(1, 2), BlockCoord::Frac(3, 4)),
                     PolyCommand::QuadTo {
                         control: (BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 2)),
-                        to: (BlockCoord::Frac(1, 4), BlockCoord::Frac(1, 2)),
+                        to: (BlockCoord::Zero, BlockCoord::Frac(1, 2)),
                     },
-                    PolyCommand::LineTo(BlockCoord::Zero, BlockCoord::Frac(1, 2)),
                 ],
                 intensity: BlockAlpha::Full,
                 style: PolyStyle::Outline,
@@ -3400,9 +3398,8 @@ impl BlockKey {
                     PolyCommand::LineTo(BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 4)),
                     PolyCommand::QuadTo {
                         control: (BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 2)),
-                        to: (BlockCoord::Frac(1, 4), BlockCoord::Frac(1, 2)),
+                        to: (BlockCoord::Zero, BlockCoord::Frac(1, 2)),
                     },
-                    PolyCommand::LineTo(BlockCoord::Zero, BlockCoord::Frac(1, 2)),
                 ],
                 intensity: BlockAlpha::Full,
                 style: PolyStyle::Outline,
@@ -3414,9 +3411,8 @@ impl BlockKey {
                     PolyCommand::LineTo(BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 4)),
                     PolyCommand::QuadTo {
                         control: (BlockCoord::Frac(1, 2), BlockCoord::Frac(1, 2)),
-                        to: (BlockCoord::Frac(3, 4), BlockCoord::Frac(1, 2)),
+                        to: (BlockCoord::One, BlockCoord::Frac(1, 2)),
                     },
-                    PolyCommand::LineTo(BlockCoord::One, BlockCoord::Frac(1, 2)),
                 ],
                 intensity: BlockAlpha::Full,
                 style: PolyStyle::Outline,
@@ -5016,18 +5012,11 @@ impl GlyphCache {
         buffer: &mut Image,
         aa: PolyAA,
         blend_mode: BlendMode,
-        bold: bool,
     ) {
         let (width, height) = buffer.image_dimensions();
         let mut pixmap =
             PixmapMut::from_bytes(buffer.pixel_data_slice_mut(), width as u32, height as u32)
                 .expect("make pixmap from existing bitmap");
-
-        let underline_height = if bold {
-            metrics.underline_height * 3
-        } else {
-            metrics.underline_height
-        };
 
         for Poly {
             path,
@@ -5048,10 +5037,10 @@ impl GlyphCache {
             paint.force_hq_pipeline = true;
             let mut pb = PathBuilder::new();
             for item in path.iter() {
-                item.to_skia(width, height, underline_height as f32, &mut pb);
+                item.to_skia(width, height, metrics.underline_height as f32, &mut pb);
             }
             let path = pb.finish().expect("poly path to be valid");
-            style.apply(underline_height as f32, &paint, &path, &mut pixmap);
+            style.apply(metrics.underline_height as f32, &paint, &path, &mut pixmap);
         }
     }
 
@@ -5104,7 +5093,6 @@ impl GlyphCache {
                     &mut buffer,
                     PolyAA::AntiAlias,
                     BlendMode::default(),
-                    false,
                 );
             }
             Some(CursorShape::BlinkingBar | CursorShape::SteadyBar) => {
@@ -5121,7 +5109,6 @@ impl GlyphCache {
                     &mut buffer,
                     PolyAA::AntiAlias,
                     BlendMode::default(),
-                    false,
                 );
             }
             Some(CursorShape::BlinkingUnderline | CursorShape::SteadyUnderline) => {
@@ -5138,7 +5125,6 @@ impl GlyphCache {
                     &mut buffer,
                     PolyAA::AntiAlias,
                     BlendMode::default(),
-                    false,
                 );
             }
         }
@@ -5152,7 +5138,6 @@ impl GlyphCache {
         &mut self,
         render_metrics: &RenderMetrics,
         key: SizedBlockKey,
-        bold: bool,
     ) -> anyhow::Result<Sprite> {
         let metrics = match &key.block {
             BlockKey::PolyWithCustomMetrics {
@@ -5253,7 +5238,6 @@ impl GlyphCache {
                             PolyAA::MoarPixels
                         },
                         BlendMode::default(),
-                        bold,
                     );
                 };
 
@@ -5337,7 +5321,6 @@ impl GlyphCache {
                             PolyAA::MoarPixels
                         },
                         BlendMode::default(),
-                        bold,
                     );
                 };
 
@@ -5487,7 +5470,6 @@ impl GlyphCache {
                             PolyAA::MoarPixels
                         },
                         BlendMode::default(),
-                        bold,
                     );
                 };
 
@@ -5620,7 +5602,6 @@ impl GlyphCache {
                                 PolyAA::MoarPixels
                             },
                             blend_mode,
-                            bold,
                         );
                     };
 
@@ -5790,7 +5771,6 @@ impl GlyphCache {
                                 PolyAA::MoarPixels
                             },
                             blend_mode,
-                            bold,
                         );
                     };
 
@@ -6007,7 +5987,6 @@ impl GlyphCache {
                         PolyAA::MoarPixels
                     },
                     BlendMode::default(),
-                    bold,
                 );
             }
         }

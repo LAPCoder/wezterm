@@ -496,12 +496,15 @@ impl crate::TermWindow {
 
                     if self.config.custom_block_glyphs {
                         if let Some(block) = &info.block_key {
-                            let bold = cluster.attrs.intensity() == Intensity::Bold;
-                            texture.replace(
+							let mut render_metrics = params.render_metrics;
+							if cluster.attrs.intensity() == Intensity::Bold {
+								render_metrics.underline_height *= 2;
+							}
+							texture.replace(
                                 gl_state
                                     .glyph_cache
                                     .borrow_mut()
-                                    .cached_block(*block, &params.render_metrics, bold)
+                                    .cached_block(*block, &render_metrics)
                                     .context("cached_block")?,
                             );
                             // Custom glyphs don't have the same offsets as computed

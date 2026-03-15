@@ -990,7 +990,7 @@ pub fn run_ls_fonts(config: config::ConfigHandle, cmd: &LsFontsCommand) -> anyho
 
                 if config.custom_block_glyphs {
                     if let Some(block) = info.only_char.and_then(BlockKey::from_char) {
-                        texture.replace(glyph_cache.cached_block(block, &render_metrics, false)?);
+                        texture.replace(glyph_cache.cached_block(block, &render_metrics)?);
                         println!(
                             "{:2} {:4} {:12} drawn by wezterm because custom_block_glyphs=true: {:?}",
                             info.cluster, text, escaped, block
